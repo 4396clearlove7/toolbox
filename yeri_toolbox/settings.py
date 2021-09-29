@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'login',
+    'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +58,7 @@ ROOT_URLCONF = 'yeri_toolbox.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'page')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,8 +79,13 @@ WSGI_APPLICATION = 'yeri_toolbox.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'yeri_toolbox',
+        'USER': 'yeri_toolbox',
+        'PASSWORD': 'KFFmtza555S82fFF',
+        'HOST': '121.37.87.19',
+        'PORT': '3306'
     }
 }
 
@@ -98,6 +107,42 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+# REST_FRAMEWORK中全局配置认证方式、权限方式。局部认证网上一大堆，请自查……^ ^
+# 如settings.py文件中没有REST_FRAMEWORK，请自主写入
+REST_FRAMEWORK = {
+    # DEFAULT_PERMISSION_CLASSES设置默认的权限类，通过认证后赋予用户的权限
+    'DEFAULT_PERMISSION_CLASSES': ( 'rest_framework.permissions.IsAuthenticated', ),
+    # DEFAULT_AUTHENTICATION_CLASSES设置默认的认证类，这里用token，也可以设置session或自定义的认证
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'rest_framework_simplejwt.authentication.JWTAuthentication', # 进行token认证
+    )
+}
+# SIMPLE_JWT是token配置项，参数很多，不一一列举，请自查……^ ^
+import datetime #导入datetime库生成时间参数
+SIMPLE_JWT = {
+     # ACCESS_TOKEN_LIFETIME设置token令牌有效时间
+     # rest_framework_simplejwt官方默认有效时间是5分钟，这里改成15天
+     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=15),
+     # REFRESH_TOKEN_LIFETIME设置token刷新令牌有效时间
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=15),
+}
+# AUTH_USER_MODEL是配置默认的校验数据表，取决你自己的用户表
+# 参数格式为：(你自己创建的app文件夹名称).(app文件夹中models.py中用户表名称)
+# 以下 login 为我创建的app文件夹名称， UserInfo 为login下的models.py中的用户表名称
+AUTH_USER_MODEL = 'login.User'
+
+# AUTH_PASSWORD_VALIDATORS是配置创建用户时的默认参数，这里密码长度最小为5位字符，系统默认时8位
+AUTH_PASSWORD_VALIDATORS = [
+     {
+          #设置密码最小长度为5
+          'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+          'OPTIONS': {'min_length': 5}
+      },
+]
+
+
 
 
 # Internationalization
